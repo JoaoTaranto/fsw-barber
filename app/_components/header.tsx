@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Card, CardContent, CardDescription, CardFooter } from "./ui/card";
 import { Button } from "./ui/button";
 import { MenuIcon } from "lucide-react";
+import { signIn, useSession } from "next-auth/react";
 
 const Header = () => {
   return (
