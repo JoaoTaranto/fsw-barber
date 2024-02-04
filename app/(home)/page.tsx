@@ -3,12 +3,13 @@ import Header from "../_components/header";
 import { ptBR } from "date-fns/locale";
 import Search from "./_components/search";
 import BookingItem from "../_components/booking-items";
-import { db } from "../_lib/prisma";
 import BarbershopItem from "./_components/barbershop-item";
+import { db } from "../_lib/prisma";
+import { Barbershop } from "@prisma/client";
 
 export default async function Home() {
   // chamar prisma para obter barbearia
-  const barbershops = await db.barbershop.findMany({});
+  const barbershops: Barbershop[] = await db.barbershop.findMany({});
 
   return (
     <div>
