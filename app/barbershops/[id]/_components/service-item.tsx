@@ -20,6 +20,8 @@ import { generateDayTimeList } from "../_helpers/hours";
 import { format, setHours, setMinutes } from "date-fns";
 import { saveBooking } from "../_actions/save-booking";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface ServiceItemProps {
   barbershop: Barbershop;
@@ -36,6 +38,8 @@ const ServiceItem = ({
   const [hour, setHour] = useState<string | undefined>();
   const { data } = useSession();
   const [submitIsLoading, setSubmitIsLoading] = useState(false);
+  const [sheetIsOpen, setSheetIsOpen] = useState(false);
+  const router = useRouter();
 
   const handleBookingClick = () => {
     if (!isAuthenticated) {
@@ -69,6 +73,16 @@ const ServiceItem = ({
         serviceId: service.id,
         userId: (data.user as any).id,
         date: newDate,
+      });
+      setSheetIsOpen(false);
+      setHour(undefined);
+      setDate(undefined);
+      toast("Reserva agendada com sucesso!", {
+        description: format(newDate, "'Para' dd 'de' MMM 'às' hh':'mm'.'"),
+        action: {
+          label: "Visualizar",
+          onClick: () => router.push("/bookings"),
+        },
       });
     } catch (error) {
       console.error(error);
@@ -107,7 +121,7 @@ const ServiceItem = ({
                     currency: "BRL",
                   }).format(Number(service.price))}
                 </p>
-                <Sheet>
+                <Sheet open={sheetIsOpen} onOpenChange={setSheetIsOpen}>
                   <SheetTrigger asChild>
                     <Button onClick={handleBookingClick} variant="secondary">
                       Reservar
@@ -154,7 +168,7 @@ const ServiceItem = ({
 
                     {/* Mostrar lista de horários se alguma data estiver selecionada. */}
                     {date && (
-                      <div className="flex overflow-x-auto py-6 px-5 border-t border-solid border-secondary gap-2 [&::-webkit-scrollbar]:hidden">
+                      <div className="flex gap-3 overflow-x-auto py-6 px-5 border-t border-solid border-secondary [&::-webkit-scrollbar]:hidden">
                         {timeList.map((time) => (
                           <Button
                             onClick={() => handleHourClick(time)}
