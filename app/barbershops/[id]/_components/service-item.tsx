@@ -13,11 +13,12 @@ import {
 } from "@/app/_components/ui/sheet";
 import { Barbershop, Service } from "@prisma/client";
 import { ptBR } from "date-fns/locale";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { generateDayTimeList } from "../_helpers/hours";
-import { format, hoursToMinutes } from "date-fns";
+import { format, setHours, setMinutes } from "date-fns";
+import { saveBooking } from "../_actions/save-booking";
 
 interface ServiceItemProps {
   barbershop: Barbershop;
@@ -32,6 +33,7 @@ const ServiceItem = ({
 }: ServiceItemProps) => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [hour, setHour] = useState<string | undefined>();
+  const { data } = useSession();
 
   const handleBookingClick = () => {
     if (!isAuthenticated) {
@@ -46,6 +48,27 @@ const ServiceItem = ({
 
   const handleHourClick = (time: string) => {
     setHour(time);
+  };
+
+  const handleBookingSubmit = async () => {
+    try {
+      if (!hour || !date || !data?.user) {
+        return;
+      }
+      const dateHour = Number(hour?.split(":")[0]);
+      const dateMinutes = Number(hour?.split(":")[1]);
+
+      const newDate = setMinutes(setHours(date, dateHour), dateMinutes);
+
+      await saveBooking({
+        barbershopId: barbershop.id,
+        serviceId: service.Id,
+        userId: (data.user as any).id,
+        date: newDate,
+      });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const timeList = useMemo(() => {
@@ -179,7 +202,11 @@ const ServiceItem = ({
                     </div>
 
                     <SheetFooter className="px-5 py-5">
-                      <Button disabled={!date || !hour} className="w-full">
+                      <Button
+                        onClick={handleBookingSubmit}
+                        disabled={!date || !hour}
+                        className="w-full"
+                      >
                         Confirmar Reserva
                       </Button>
                     </SheetFooter>
