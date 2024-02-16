@@ -29,9 +29,9 @@ const BookingsPage = async () => {
 
         <h2>Confirmados</h2>
 
-        {booking.map((booking) => {
-          <BookingItem key={booking.id} booking={booking} />;
-        })}
+        {booking.map((booking) => (
+          <BookingItem key={booking.id} booking={booking} />
+        ))}
       </div>
     </>
   );
